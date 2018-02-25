@@ -272,7 +272,7 @@ while 1:
         flag=1
         
     if flag==1 or a[0]=="else" or a[0]=="elsif":
-        if a[0]!="end" and len(a)>1:
+        if a[0]!="end":
             flag,done,FOR=output(token(a),flag,done,FOR)
             
     if FOR[0]==1:
@@ -297,5 +297,5 @@ while 1:
                     
                 if flag==1 or a[0]=="else" or a[0]=="elsif":
                     
-                    if a[0]!="end" and len(a)>1:
+                    if a[0]!="end":
                         flag,done,FOR=output(token(a),flag,done,FOR)
