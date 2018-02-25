@@ -11,6 +11,8 @@ def token(s):
     seprator=[",","#",";"]
 
     tokens=[]
+    if a[0]=='':
+        return "errorrrr"
     for j in a:
 
         if j in keywords:
