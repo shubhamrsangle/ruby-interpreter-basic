@@ -104,7 +104,15 @@ def output(b,flag,done,FOR):
     flag=flag
 
     if b[0]=="puts":
-        c=b[1:]
+        c=[]
+        
+        for j in b[1:]:
+            if j in dic:
+                c.append(str(dic[j]))
+            else:
+                c.append(str(j))
+                
+            
         d=''.join(c)
 
         if d in dic:
@@ -113,7 +121,13 @@ def output(b,flag,done,FOR):
             print(eval(d))
 
     elif b[0]=="print":
-        c=b[1:]
+        c=[]
+        
+        for j in b[1:]:
+            if j in dic:
+                c.append(str(dic[j]))
+            else:
+                c.append(str(j))
         d=''.join(c)
 
         if d in dic:
