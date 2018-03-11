@@ -1,142 +1,61 @@
-def token(s):
-    keywords=["print","puts","new","require","break","begin","end","alias","gets","strip","if","else","unless","for","in","while","class","def","define","do","nil",
-              "not","rescue","retry","return","self","super","then","do","true","unless","until","yield","case","class","def"]
+from lexanalysis import *
+from parser import *
 
-    methods=["sort","to_i","to_s","map"]
-
-    operators=["+","-","/","%","<",">","*",".","!",":","&","(",")","{","}","[","]","-","?","#","=",'"',"'"]
-
-    op=["(",")","{","}","[","]","'",'"']
-
-    seprator=[",","#",";"]
-
-    tokens=[]
-    if a[0]=='':
-        return "errorrrr"
-    for j in a:
-
-        if j in keywords:
-            #print(j,"->keyword")
-            tokens.append(j)
-
-        elif j in methods:
-            #print(j,"->methods")
-            tokens.append(j)
-
-        elif j in operators:
-            #print(j,"->operators")
-            tokens.append(j)
-
-        elif j in seprator:
-            #print(j,"seprator")
-            tokens.append(j)
-
-        else:
-            n=len(j)
-            s=j
-            i=0
-
-            while i<n:
-                variable=''
-
-                if s[i].isalpha() or s[i].isdigit() or s[i]=="_" or s[i]=="'" or s[i]=='"':
-
-                    while s[i].isalpha() or s[i].isdigit() or s[i]=="_" or s[i]=="'" or s[i]=='"':
-                        variable+=s[i]
-                        i=i+1
-
-                        if i==n:
-                            break
-
-                    if variable in keywords:         
-                        #print(variable,"->keywords")
-                        tokens.append(variable)
-                        continue
-
-                    elif variable in methods:
-                        #print(variable,"->methods")
-                        tokens.append(variable)
-                        continue
-
-                    else:
-                        #print(variable,"->identifiers")
-                        tokens.append(variable)
-                        continue
-
-                elif s[i] in operators:
-                    oper=''
-
-                    if s[i] in op:
-                        #print(s[i],"->operator")
-                        tokens.append(s[i])
-                        i+=1
-                        continue
-
-                    while s[i] in operators:
-
-                        if s[i] in op:
-                            tokens.append(oper)
-                            tokens.append(s[i])
-                            oper=''
-                            i+=1
-                            continue
-                        oper+=s[i]
-                        i+=1
-
-                        if i==n:
-                            break
-                    #print(oper,"->operator")
-                    if len(oper)>0:
-                        tokens.append(oper)
-                    continue
-
-                elif s[i] in seprator:
-                    #print(s[i],"->seprator")
-                    tokens.append(s[i])
-                    i+=1
-                    continue
-
-                else:
-                    print("error")
-                    return "error"
-                    break
-    return tokens
-def output(b,flag,done,FOR):
-    
+def parser(b,flag,done,FOR):
+   
     flag=flag
 
     if b[0]=="puts":
         c=[]
-        
         for j in b[1:]:
             if j in dic:
                 c.append(str(dic[j]))
             else:
                 c.append(str(j))
-                
-            
         d=''.join(c)
-
         if d in dic:
             print(dic[d])
         else:
-            print(eval(d))
-
+            try:
+                print(eval(d))
+            except:
+                try:
+                    d='"'+d+'"'
+                    print(eval(d))
+                except NameError as e:
+                    print("line",linenumber,":")
+                    print(e)
+                    exit(1)
+                
+        
     elif b[0]=="print":
         c=[]
-        
         for j in b[1:]:
             if j in dic:
                 c.append(str(dic[j]))
             else:
-                c.append(str(j))
+                if j.isalpha():
+                    c.append('"'+str(j)+'"')
+                    
+                    
+                else:
+                    c.append(str(j))
         d=''.join(c)
-
         if d in dic:
             print(dic[d])
         else:
-            print(eval(d),end=" ")
-            print()
+            try:
+                
+                print(eval(d),end=" ")
+            except:
+                try:
+                    d='"'+d+'"'
+                    print(eval(d))
+                except NameError as e:
+                    print("line",linenumber,":",end=" ")
+                    print(e)
+                    exit(1)
+                
         
     elif "=" in b and b[2]!="gets":
         c=b[2:]
@@ -157,6 +76,7 @@ def output(b,flag,done,FOR):
             dic[b[0]]=dic[q]
 
         else:
+            print(q)
             dic[b[0]]=eval(q)
 
     elif b[0]=="if":
@@ -171,27 +91,40 @@ def output(b,flag,done,FOR):
                 
 
             else:
-                final=str(dic[first])+str(z[1])+str(second)
+                try:
+                    final=str(dic[first])+str(z[1])+str(second)
+                except:
+                    print("line number:",linenumber,"syntax error")
+                    exit(1)
                 
 
         else:
+            try:
 
-            if second in dic:
-                final=str(first)+str(z[1])+str(dic[second])
+                if second in dic:
+                    final=str(first)+str(z[1])+str(dic[second])
+                    
+
+                else:
+                    final=str(first)+str(z[1])+str(second)
+            except:
+                print("line number:",linenumber,"syntax error")
+                exit(1)
                 
-
-            else:
-                final=str(first)+str(z[1])+str(second)
                 
         #print(eval(final))
-        if eval(final):
-            flag=1
-            done=0
-            
+        try:
+            if eval(final):
+                flag=1
+                done=0
 
-        else:
-            flag=0
-            done=1
+            else:
+                flag=0
+                done=1
+        except NameError as e:
+            print("line",linenumber,":",end=" ")
+            print(e)
+            exit(1)
 
     elif b[0]=="elsif" and flag==1:
         flag=0
@@ -247,27 +180,54 @@ def output(b,flag,done,FOR):
                 dic[b[0]]=int(dic[b[0]])
                 
     elif b[0]=="for":
-        FOR[0]=1
-        if b[3] in dic:
+        if b[2]=="in" and len(b)==6:
+            FOR[0]=1
+            FOR[3]=b[1]
+            if b[3] in dic:
+                try:
+                
+                    FOR[1]=dic[b[3]]
+                    dic[b[1]]=int(FOR[1])-1
+                except ValueError as e:
+                    print("line",linenumber,":",end=" ")
+                    print(e)
+                    exit(1)
+            else:
+                try:
+    
+                    FOR[1]=int(b[3])
+                    dic[b[1]]=int(FOR[1])-1
+                except NameError as e:
+                    print("line",linenumber,":",end=" ")
+                    print(e)
+                    exit(1)
+            if b[5] in dic:
+                FOR[2]=dic[b[5]]
+            else:
+                try:
+                    FOR[2]=int(b[5])
+                except ValueError as e:
+                    print("line",linenumber,":",end=" ")
+                    print(e)
+                    exit(1)
+            return flag,done,FOR
+
             
-            FOR[1]=dic[b[3]]
-        else:
-
-            FOR[1]=b[3]
-        if b[5] in dic:
-            FOR[2]=dic[b[5]]
-        else:
-            FOR[2]=b[5]
-
-    return flag,done,FOR    
+        FOR[0]=0
+        print("Syntax Error in line",linenumber)
+        exit(255)
+    return flag,done,FOR
+    
 dic={}
 flag=1
 done=0
-FOR=[0]*3
+FOR=[0]*4
+linenumber=0
 while 1:
     ifcount=0
     forcount=0
     a=input().strip().split(' ')
+    linenumber+=1
     #print(len(a))
     
     if a[0]=="end":
@@ -275,29 +235,36 @@ while 1:
         
     if flag==1 or a[0]=="else" or a[0]=="elsif":
         if a[0]!="end":
-            flag,done,FOR=output(token(a),flag,done,FOR)
+            flag,done,FOR=parser(token(a),flag,done,FOR)
             
     if FOR[0]==1:
         array=[]
         while forcount<=ifcount:
             #print(ifcount,forcount)
             a=input().strip().split(' ')
+            linenumber+=1
             if a[0]=="end":
                 forcount=forcount+1
             if a[0]=="if":
                 ifcount=ifcount+1
             array.append(a)
         #print(array)
+        try:
             
-        for i in range(int(FOR[1]),int(FOR[2])):
-            
-            for k in range(0,len(array)):
+            for i in range(int(FOR[1]),int(FOR[2])):
+                dic[FOR[3]]=int(dic[FOR[3]])+1
                 
-                a=array[k]
-                if a[0]=="end":
-                    flag=1
+                for k in range(0,len(array)):
                     
-                if flag==1 or a[0]=="else" or a[0]=="elsif":
-                    
-                    if a[0]!="end":
-                        flag,done,FOR=output(token(a),flag,done,FOR)
+                    a=array[k]
+                    if a[0]=="end":
+                        flag=1
+                        
+                    if flag==1 or a[0]=="else" or a[0]=="elsif":
+                        
+                        if a[0]!="end":
+                            flag,done,FOR=parser(token(a),flag,done,FOR)
+        except ValueError as e:
+            print("line",linenumber,":",end=" ")
+            print(e)
+            exit(1)
