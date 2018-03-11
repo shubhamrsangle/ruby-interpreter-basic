@@ -76,7 +76,6 @@ def parser(b,flag,done,FOR):
             dic[b[0]]=dic[q]
 
         else:
-            print(q)
             dic[b[0]]=eval(q)
 
     elif b[0]=="if":
